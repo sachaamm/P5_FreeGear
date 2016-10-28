@@ -399,7 +399,13 @@ void calculCenterCircle(float currentCenterAngle) {
     currentCenterAngle+=(PI*2/centerCircle.length);
   }
 
-  // DRAW CENTER CIRCLE
+
+}
+
+
+void displayCenterCircle(){
+  
+    // DRAW CENTER CIRCLE
   for (int i = 0; i < centerCircle.length; i++) {
     if (i < centerCircle.length-1) {
       line( centerCircle[i][0], centerCircle[i][1], centerCircle[i+1][0], centerCircle[i+1][1]);
@@ -407,7 +413,10 @@ void calculCenterCircle(float currentCenterAngle) {
       line( centerCircle[i][0], centerCircle[i][1], centerCircle[0][0], centerCircle[0][1]);
     }
   }
+  
+  
 }
+
 
 
 
@@ -469,3 +478,99 @@ void reechelonnerNombreDeDents() {
   r = modelRadius * f;
   yCercleTrigo+= (modelRadius - r)/2;
 }
+
+
+void changeNbTeeth(int nVal){
+  
+   nbDents = nVal;
+
+ yCercleTrigo = y;
+
+
+  float f = ((float)nVal / (float)initNbTeeth);
+  r = modelRadius * f;
+  yCercleTrigo+= (modelRadius - r)/2;
+  
+  
+}
+
+
+
+void buildGear(){
+  
+  
+    scaling();
+
+  initialisationTrigonometrie();
+
+  // CALCUL DES INTERSECTIONS
+  calculIntersection();
+
+
+  curvePoints = constrainCurvePointAroundCircleAxis(curvePoints, y - r/2);
+  curvePoints2 = constrainCurvePointAroundCircleAxis(curvePoints2, y - r/2);
+
+  curvePoints = scalePoints(curvePoints);
+  curvePoints2 = scalePoints(curvePoints2);
+
+
+  gearPoints = new float[curvePoints.length*2*nbDents + nbCirclePoints*nbDents][3];
+  calculTeeth();
+
+
+
+  // REORDER GEAR POINTS
+  reorder();
+
+  float currentCenterAngle = PI;
+
+  // ADAPT CENTER CIRCLE RADIUS TO REVERSE MODE
+  if (reverse) { 
+    centerCircleRadius = r*0.6;  
+    currentCenterAngle = PI  + PI*2/nbDents ;
+  }
+
+
+  calculCenterCircle(currentCenterAngle);
+  
+
+  // créer des espaces vides pour optimiser la consommation
+  int nbMiddlePoints = nbDents - nbDents %2;
+  middlePointsUp = new float[nbMiddlePoints][2];
+  middlePointsDown = new float[nbMiddlePoints][2];
+
+
+  calculMiddlePoints();
+
+  nbOfBrackets = nbDents - nbOfCenterHoles;
+
+
+    int interval = nbInput * 2 + nbCirclePoints;
+
+    for (int i = gearPoints.length - interval; i >= gearPoints.length  - (enleverDents * interval); i-=interval) {
+
+      for (int k = 0; k < nbInput*2; k++) {
+
+        gearPoints[i + k] = gearPoints[i];
+      }
+      //println(i);
+    }
+    
+    
+
+
+  // création de la forme de l'engrenage ou sont stockées les positions des points.
+  sh = buildShExtruded(gearPoints, epaisseur);
+
+
+
+
+}
+
+
+  
+  
+
+
+
+

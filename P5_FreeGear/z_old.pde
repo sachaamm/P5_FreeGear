@@ -2,12 +2,14 @@
 
 
 
-void drawLinear() {
+void drawLinear(float x,float y) {
 
   pushStyle();
-  strokeWeight(2);
+  strokeWeight(1);
   for (int i = 0; i < linearGear.length; i++) {
-    point(linearGear[i][0], linearGear[i][1]) ;
+    //point(linearGear[i][0], linearGear[i][1]) ;
+    line(x + linearGear[i][0],y + linearGear[i][1], x + linearGear[(i+1)%linearGear.length][0], y + linearGear[(i+1)%linearGear.length][1]);
+    
   }
   popStyle();
 

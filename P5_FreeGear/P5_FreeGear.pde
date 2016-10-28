@@ -4,11 +4,18 @@ import processing.pdf.*;
 boolean saveOneFrame = false;
 
 
+import controlP5.*;
+
+
 /////////
 //  VARIABLE TRIGONOMETRIQUES
+
+// 84 // 111 // 99 //120 // 90
+
 int divisionDuCercle = 99;
 
 int nbDents = divisionDuCercle / 3;
+//nbDents = 30;
 int initNbTeeth = nbDents;
 
 float r = 0; // radius
@@ -16,7 +23,7 @@ float x, y; // position
 float xCercleTrigo, yCercleTrigo;
 
 
-float[][] circleData,circleData2,normData,normData2;
+float[][] circleData, circleData2, normData, normData2;
 
 
 int nbInput = 8;//nb Of Points for a Teeth.
@@ -79,8 +86,51 @@ float xL = 200;  //x start for Linear Gear
 
 /////////////////////
 
+// 84 // 111 // 99 //120 // 90
 
 
+int[] divisionDuCerclePossible;
+
+
+ControlP5 cp5;
+
+Textlabel nbTeethLabel;
+
+float hauteurDeDent = 0;
+
+
+//GUI
+
+//GENERAL PARAMETER
+float xGeneralParamater = 50;
+float xGeneralParameterSlider = 200;
+int parameterFontSize = 25;
+//float yGeneralParameterOffset = 40;
+int parameterSliderWidth = 120;
+int parameterSliderHeight = 20;
+
+
+float xGUIInfo = 400;
+int guiInfoSize = 20;
+
+int infoFontSize = 20;
+
+float xExportParameter = 850;
+
+
+
+float xGUIModes = 600;
+
+char gearMode = 's';
+
+
+
+
+
+
+
+ int enleverDents = 0;
+ 
 void setup() {
 
   size(displayHeight, displayHeight, OPENGL);
@@ -124,6 +174,15 @@ void setup() {
   radiusBetweenTeeth = calculDiametre(gearPoints[1][0] - gearPoints[2][0], gearPoints[1][1] - gearPoints[2][1] );
 
   sh = createShape();
+
+
+  buildGUI();
+  
+  
+  buildGear();
+  
+  
+  
 }
 
 
@@ -131,107 +190,54 @@ void draw() {
 
   background(255);
 
-  scaling();
+  cp5.get(Textlabel.class, "gearDiameter")
+    .setText("Gear Diameter:          " + ((r + hauteurDeDent*2)/divide)+ " mm");
 
-  initialisationTrigonometrie();
+  cp5.get(Textlabel.class, "centralHoleDiameter")
+    .setText("Central Hole Diameter:          " + (centerCircleRadius*2/divide) + " mm" );
 
-  // CALCUL DES INTERSECTIONS
-  calculIntersection();
-  
-  
-  
-  // informations sur l'engrenage
-  displayInfo();
-  
-  
-  
 
-  // DIVISION DU CERCLE    // 84 // 111 // 99 //120 // 90
-  if (keyPressed && key == 'x')  divisionDuCercle = 3 * (int)map(mouseX, 0, width, 1, 66);
-
-  // PROFILE TEETH.
-  if (keyPressed && key=='q')  setScaling('y');
-   if (keyPressed && key=='w')  setScaling('x');
-  
-  
-  curvePoints = constrainCurvePointAroundCircleAxis(curvePoints, y - r/2);
-  curvePoints2 = constrainCurvePointAroundCircleAxis(curvePoints2, y - r/2);
-
-  curvePoints = scalePoints(curvePoints);
-  curvePoints2 = scalePoints(curvePoints2);
-
-  //
-
-  gearPoints = new float[curvePoints.length*2*nbDents + nbCirclePoints*nbDents][3];
-  calculTeeth();
-
-//println(curvePoints.length);
-  //////
-
-  if (keyPressed && key =='k' && saveOneFrame){
+  if (saveOneFrame) {
     background(255);
+    drawGear();
     exportPDF();
   }
-
-  // REORDER GEAR POINTS
-  reorder();
-
-  float currentCenterAngle = PI;
-
-  // ADAPT CENTER CIRCLE RADIUS TO REVERSE MODE
-  if (reverse) { 
-    centerCircleRadius = r*0.6;  
-    currentCenterAngle = PI  + PI*2/nbDents ;
-  }
-
-  // modify radius of the center circle.
-  if (keyPressed && key == 'g') centerCircleRadius = r * map(mouseX, 0, width, 0.005, 0.42);
-
-  // modifier l' epaisseur de la pièce
-  if (keyPressed && key == 'a') epaisseur = map(mouseX, 0, width, 20, 50); 
-
-  //Création des position du trou central  
-  calculCenterCircle(currentCenterAngle);
-
-  // créer des espaces vides pour optimiser la consommation
-  int nbMiddlePoints = nbDents - nbDents %2;
-  middlePointsUp = new float[nbMiddlePoints][2];
-  middlePointsDown = new float[nbMiddlePoints][2];
-
-
-  calculMiddlePoints();
-  // drawMiddlePoints();
-  // drawCutting();
   
-  
-  //drawCirclePoints();
 
-  nbOfBrackets = nbDents - nbOfCenterHoles;
 
-  if(keyPressed && key == 'z'){
-    
-  int enleverDents = 1;
+
+
+
+
+  linearGear =  calculLinearGear(nbOfTeethInLine);
   
-  enleverDents= (int)map(mouseX,0,width,1, 10);
-  int interval = nbInput * 2 + nbCirclePoints;
-  
-   for(int i = gearPoints.length - interval   ; i >= gearPoints.length  - (enleverDents * interval)  ; i-=interval){
-    
-    for(int k = 0 ; k < nbInput*2  ; k++){
-      
-      gearPoints[i + k] = gearPoints[i];
-    }
-    println(i);
-    
-  }
+
+
+
+
+
+
+
+  if (gearMode =='s' || gearMode=='r') { 
+
+
+  displayCenterCircle();
   
   }
-  
 
-  // création de la forme de l'engrenage ou sont stockées les positions des points.
-  sh = buildShExtruded(gearPoints, epaisseur);
- // shape(sh);
- drawGear();
+
+
+  // shape(sh);
+  if (gearMode =='s' || gearMode=='r') { 
+
+    drawGear(); 
+    //Création des position du trou central
+  } else {
+
+    drawLinear(-200,-200);
+  }
+  
+  
 
 
   // STOP PDF EXPORTING
@@ -240,26 +246,49 @@ void draw() {
     saveOneFrame = false;
   }
 
+
+
+
+
+
+
+
+
+
   // GRILLE DE REPERE
   if (mousePressed) displayGrid();
 
-  linearGear =  calculLinearGear(nbOfTeethInLine);
-  drawLinear();
+
+  // modify radius of the center circle.
+  if (keyPressed && key == 'g') centerCircleRadius = r * map(mouseX, 0, width, 0.005, 0.42);
+
+  // modifier l' epaisseur de la pièce
+  if (keyPressed && key == 'a') epaisseur = map(mouseX, 0, width, 20, 50); 
+
+
+
+  // DIVISION DU CERCLE    // 84 // 111 // 99 //120 // 90
+  if (keyPressed && key == 'x')  divisionDuCercle = 3 * (int)map(mouseX, 0, width, 1, 66);
+
+  // PROFILE TEETH.
+  if (keyPressed && key=='q')  setScaling('y');
+  if (keyPressed && key=='w')  setScaling('x');
+// drawCirclePoints();
+  //drawIntermediaryPositions();
   
   
- 
-  
-  
-  /*
-  drawIntermediaryPositions();
- */
-  
-  
+  // informations sur l'engrenage
+  //displayInfo();
+
+
+
+
+
 }
 
 
 void keyPressed() {
-  
+
 
   if ( key =='u') exportLinearObj(epaisseur, nbOfTeethInLine);
 
@@ -279,8 +308,8 @@ void keyPressed() {
 
   // REECHELONNER NOMBRE DE DENTS ET RADIUS
   if ( key=='e')  reechelonnerNombreDeDents();
-  
-   
+
+
 
   // REVERSE MODE
   if (key=='r') {
@@ -291,3 +320,6 @@ void keyPressed() {
   // EXPORT PDF
   if (key=='k') saveOneFrame = true;
 }
+
+
+

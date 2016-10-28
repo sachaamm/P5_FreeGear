@@ -35,14 +35,14 @@ void displayInfo() {
   float upX =  gearPoints[nbInput-1][0] ;
   float upY =  gearPoints[nbInput-1][1] ;
 
-  float hauteurDeDent = firstY - upY;
+  hauteurDeDent = firstY - upY;
   text("hauteur de la dent "+ (hauteurDeDent/divide) + " mm", 20, 80 );
   //float[] gearSize = getGearSize(gearPoints);
   //text("width " + gearSize[0] + " heighearSize "+gearSize[1],20 , 80);
   noFill();
 
   text("diametre "+ ((r + hauteurDeDent*2)/divide)+ " mm", 20, 100 );
-  text("trou central "+ (centerCircleRadius*2/divide) + " mm", 20, 120 );
+  text("trou central " + (centerCircleRadius*2/divide) + " mm", 20, 120 );
   text("epaisseur "+ (epaisseur/divide) + " mm", 20, 140 );
   text("nb Of Center Holes : "+nbOfCenterHoles, 20, 160);
   text("nb Of Brackets : "+nbOfBrackets, 20, 180);
