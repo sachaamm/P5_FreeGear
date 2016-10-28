@@ -6,7 +6,7 @@ A Processing Tool to design and export Spur and Linear Gears</br>
  Extract ControlP5 folder to this destination : </br>
 C:/Users/USERNAME/Documents/Processing/libraries  (Windows)</br>
 /Users/your_user_name/Documents/Processing/libraries (Mac & Linux)</br>
-
+3- Launch Processing , select open , open all .pde Files in P5_FreeGear folder . Enjoy ;)
 
 
 
